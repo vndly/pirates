@@ -1,2 +1,1 @@
-# pirates
-Pirates
+# Pirates
