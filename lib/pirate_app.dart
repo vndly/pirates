@@ -18,6 +18,7 @@ class PiratesApp extends StatelessWidget {
     const int color = 0xff0493B1;
 
     return MaterialApp(
+      title: 'Piratas',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: const MaterialColor(

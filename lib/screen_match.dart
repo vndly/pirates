@@ -59,7 +59,7 @@ class MatchScreen extends StatelessWidget {
       if (turn.turn < MAX_TURNS) {
         selectWinner(context, turn);
       } else {
-        requestResults(context, 0, turn);
+        requestResults(context, 0, turn, 0);
       }
     } else {
       requestBets(context, 0, turn);
@@ -80,16 +80,26 @@ class MatchScreen extends StatelessWidget {
     }
   }
 
-  void requestResults(BuildContext context, int playerIndex, Turn turn) {
+  void requestResults(
+    BuildContext context,
+    int playerIndex,
+    Turn turn,
+    int sumOfResults,
+  ) {
     if (playerIndex < state.amountOfPlayers) {
       showDialog(
         context: context,
         builder: (context) => NumberDialog(
           state.names[playerIndex],
           turn.turn,
-          (value) => resultSubmitted(context, playerIndex, turn, value),
+          (value) =>
+              resultSubmitted(context, playerIndex, turn, value, sumOfResults),
         ),
       );
+    } else if (turn.turn != sumOfResults) {
+      showDialog(
+          context: context,
+          builder: (context) => WrongResultDialog(turn.turn, sumOfResults));
     }
   }
 
@@ -100,7 +110,7 @@ class MatchScreen extends StatelessWidget {
         state.names,
         (value) {
           state.setPlayerStarting(value);
-          requestResults(context, 0, turn);
+          requestResults(context, 0, turn, 0);
         },
       ),
     );
@@ -111,6 +121,7 @@ class MatchScreen extends StatelessWidget {
     int playerIndex,
     Turn turn,
     int value,
+    int sumOfResults,
   ) {
     final TurnEntry entry = turn.entries[playerIndex];
     final bet = entry.betValue ?? 0;
@@ -138,7 +149,7 @@ class MatchScreen extends StatelessWidget {
     }
 
     state.notify();
-    requestResults(context, playerIndex + 1, turn);
+    requestResults(context, playerIndex + 1, turn, sumOfResults + value);
   }
 
   void onTurnBetSelected(BuildContext context, TurnEntry entry) {
@@ -435,6 +446,47 @@ class WinnerDialog extends StatelessWidget {
               ],
             ),
             const VBox(5),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class WrongResultDialog extends StatelessWidget {
+  final int turn;
+  final int results;
+
+  const WrongResultDialog(this.turn, this.results);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        width: 300,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const VBox(15),
+            Center(
+              child: Text(
+                'Turn: $turn - Results: $results',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+            const VBox(15),
+            ConstrainedBox(
+              constraints: const BoxConstraints.tightFor(width: 250),
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(primary: Colors.red),
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(8, 12, 8, 12),
+                  child: Text('OK'),
+                ),
+              ),
+            ),
+            const VBox(15),
           ],
         ),
       ),
