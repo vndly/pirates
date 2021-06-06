@@ -70,12 +70,16 @@ class MatchScreen extends StatelessWidget {
     if (playerIndex < state.amountOfPlayers) {
       showDialog(
         context: context,
-        builder: (context) =>
-            NumberDialog(state.names[playerIndex], turn.turn, (value) {
-          turn.entries[playerIndex].betValue = value;
-          state.notify();
-          requestBets(context, playerIndex + 1, turn);
-        }),
+        builder: (context) => NumberDialog(
+          state.names[playerIndex],
+          turn.turn,
+          null,
+          (value) {
+            turn.entries[playerIndex].betValue = value;
+            state.notify();
+            requestBets(context, playerIndex + 1, turn);
+          },
+        ),
       );
     }
   }
@@ -92,6 +96,7 @@ class MatchScreen extends StatelessWidget {
         builder: (context) => NumberDialog(
           state.names[playerIndex],
           turn.turn,
+          turn.entries[playerIndex].betValue,
           (value) =>
               resultSubmitted(context, playerIndex, turn, value, sumOfResults),
         ),
@@ -326,9 +331,11 @@ class InputDialog extends StatelessWidget {
 class NumberDialog extends StatelessWidget {
   final String playerName;
   final int maxValue;
+  final int? highlight;
   final Function(int) callback;
 
-  const NumberDialog(this.playerName, this.maxValue, this.callback);
+  const NumberDialog(
+      this.playerName, this.maxValue, this.highlight, this.callback);
 
   @override
   Widget build(BuildContext context) {
@@ -357,7 +364,9 @@ class NumberDialog extends StatelessWidget {
                   Container(
                     width: 80,
                     height: 80,
-                    color: const Color(0xfff0f0f0),
+                    color: ((highlight == null) || (highlight != i))
+                        ? const Color(0xfff0f0f0)
+                        : const Color(0xffd0d0d0),
                     margin: const EdgeInsets.all(10),
                     child: Material(
                       color: Colors.transparent,
